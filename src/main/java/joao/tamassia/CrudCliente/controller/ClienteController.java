@@ -1,15 +1,19 @@
 package joao.tamassia.CrudCliente.controller;
 
 import joao.tamassia.CrudCliente.entities.Cliente;
+import joao.tamassia.CrudCliente.exceptions.ClienteNotFoundException;
 import joao.tamassia.CrudCliente.repository.ClienteRepository;
+import joao.tamassia.CrudCliente.utility.ValidaCPF;
+import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Optional;
 
 @RestController
-@RequestMapping("/cliente")
+@RequestMapping("/clientes")
 public class ClienteController {
 private final ClienteRepository repository;
 
@@ -31,6 +35,16 @@ private final ClienteRepository repository;
 
     @PostMapping
     public ResponseEntity<Cliente> adicionarCliente(@RequestBody Cliente cliente) {
+        if (!ValidaCPF.isCPF(cliente.getCpf())) {
+            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+        }
+
+        Optional<Cliente> clienteExistente = repository.findByCpf(cliente.getCpf());
+        if (clienteExistente.isPresent()) {
+            // Cliente com CPF já existe
+            return new ResponseEntity<>(HttpStatus.CONFLICT); // ou outro status HTTP apropriado
+        }
+
         Cliente novoCliente = repository.save(cliente);
         return new ResponseEntity<>(novoCliente, HttpStatus.CREATED);
     }
@@ -40,8 +54,8 @@ private final ClienteRepository repository;
         Cliente clienteAtualizado = repository.findById(id).map(clienteExistente -> {
             clienteExistente.setNome(cliente.getNome());
             clienteExistente.setCpf(cliente.getCpf());
-            clienteExistente.setEndereco(cliente.getEndereco());
-            clienteExistente.setTelefone(cliente.getTelefone());
+            clienteExistente.setDataNascimento(cliente.getDataNascimento());
+            clienteExistente.setEmail(cliente.getEmail());
             return repository.save(clienteExistente);
         }).orElse(null);
         return new ResponseEntity<>(clienteAtualizado, HttpStatus.OK);
@@ -49,9 +63,16 @@ private final ClienteRepository repository;
 
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> removerCliente(@PathVariable Integer id) {
-        repository.deleteById(id);
-        return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+        if (repository.existsById(id)) {
+            repository.deleteById(id);
+            return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+        } else {
+            throw new ClienteNotFoundException("Cadastro não encontrado para o ID: " + id);
+        }
     }
+
+
+
 
 
 }
