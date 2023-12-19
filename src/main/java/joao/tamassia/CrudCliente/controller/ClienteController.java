@@ -3,6 +3,7 @@ package joao.tamassia.CrudCliente.controller;
 import joao.tamassia.CrudCliente.entities.Cliente;
 import joao.tamassia.CrudCliente.exceptions.ClienteNotFoundException;
 import joao.tamassia.CrudCliente.repository.ClienteRepository;
+import joao.tamassia.CrudCliente.response.ErrorResponse;
 import joao.tamassia.CrudCliente.utility.ValidaCPF;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.http.HttpStatus;
@@ -34,9 +35,10 @@ private final ClienteRepository repository;
     }
 
     @PostMapping
-    public ResponseEntity<Cliente> adicionarCliente(@RequestBody Cliente cliente) {
+    public ResponseEntity<?> adicionarCliente(@RequestBody Cliente cliente) {
         if (!ValidaCPF.isCPF(cliente.getCpf())) {
-            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+            ErrorResponse errorResponse = new ErrorResponse("CPF informado inválido");
+            return new ResponseEntity<>(errorResponse, HttpStatus.BAD_REQUEST);
         }
 
         Optional<Cliente> clienteExistente = repository.findByCpf(cliente.getCpf());
@@ -48,6 +50,8 @@ private final ClienteRepository repository;
         Cliente novoCliente = repository.save(cliente);
         return new ResponseEntity<>(novoCliente, HttpStatus.CREATED);
     }
+
+
 
     @PutMapping("/{id}")
     public ResponseEntity<Cliente> atualizarCliente(@PathVariable Integer id, @RequestBody Cliente cliente) {
