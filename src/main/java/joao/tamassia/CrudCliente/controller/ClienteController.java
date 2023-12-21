@@ -33,9 +33,11 @@ private final ClienteRepository repository;
 
     @GetMapping("/{id}")
     public ResponseEntity<Cliente> obterClientePorId(@PathVariable Integer id) {
-        Cliente cliente = repository.findById(id).orElse(null);
+        Cliente cliente = repository.findById(id)
+                .orElseThrow(() -> new ClienteNotFoundException("Cliente não encontrado para o ID: " + id));
         return new ResponseEntity<>(cliente, HttpStatus.OK);
     }
+
 
     @PostMapping
     public ResponseEntity<?> adicionarCliente(@RequestBody @Valid Cliente cliente) {
