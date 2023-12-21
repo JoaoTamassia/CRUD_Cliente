@@ -5,7 +5,9 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
-import jakarta.validation.constraints.Past;
+import jakarta.validation.constraints.Email;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -22,9 +24,12 @@ public class Cliente {
     private String cpf;
     private String nome;
 
-    @Past
-    @JsonFormat(pattern = "dd-MM-yyyy")
+    @JsonFormat(pattern = "yyyy-MM-dd")
     private LocalDate dataNascimento;
+
+    @NotBlank
+    @NotNull
+    @Email(message = "Email inválido")
     private String email;
 
     public Cliente(String nome, String cpf, LocalDate dataNascimento, String telefone) {

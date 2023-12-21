@@ -1,9 +1,12 @@
 package joao.tamassia.CrudCliente.controller;
 
+import jakarta.validation.Valid;
 import joao.tamassia.CrudCliente.entities.Cliente;
 import joao.tamassia.CrudCliente.exceptions.ClienteNotFoundException;
 import joao.tamassia.CrudCliente.repository.ClienteRepository;
 import joao.tamassia.CrudCliente.response.ErrorResponse;
+import joao.tamassia.CrudCliente.utility.EmailValidator;
+import joao.tamassia.CrudCliente.utility.IdadeValidaValidator;
 import joao.tamassia.CrudCliente.utility.ValidaCPF;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.http.HttpStatus;
@@ -35,9 +38,19 @@ private final ClienteRepository repository;
     }
 
     @PostMapping
-    public ResponseEntity<?> adicionarCliente(@RequestBody Cliente cliente) {
+    public ResponseEntity<?> adicionarCliente(@RequestBody @Valid Cliente cliente) {
         if (!ValidaCPF.isCPF(cliente.getCpf())) {
             ErrorResponse errorResponse = new ErrorResponse("CPF informado inválido");
+            return new ResponseEntity<>(errorResponse, HttpStatus.BAD_REQUEST);
+        }
+
+        if (!IdadeValidaValidator.isValid(cliente.getDataNascimento())) {
+            ErrorResponse errorResponse = new ErrorResponse("Idade inválida");
+            return new ResponseEntity<>(errorResponse, HttpStatus.BAD_REQUEST);
+        }
+
+        if(!EmailValidator.isValid(cliente.getEmail())){
+            ErrorResponse errorResponse = new ErrorResponse("Email inválido");
             return new ResponseEntity<>(errorResponse, HttpStatus.BAD_REQUEST);
         }
 
