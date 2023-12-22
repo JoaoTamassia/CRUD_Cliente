@@ -24,7 +24,7 @@ public class Cliente {
     private String cpf;
     private String nome;
 
-    @JsonFormat(pattern = "yyyy-MM-dd")
+    @JsonFormat(pattern = "dd/MM/yyyy")
     private LocalDate dataNascimento;
 
     @NotBlank
