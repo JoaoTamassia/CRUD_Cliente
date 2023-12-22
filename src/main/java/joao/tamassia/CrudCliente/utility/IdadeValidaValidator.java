@@ -17,6 +17,7 @@ public class IdadeValidaValidator {
         Period periodo = Period.between(dataNascimento, hoje);
         int idade = periodo.getYears();
 
-        return idade <= IDADE_MAXIMA && idade > 0;
+        return idade <= IDADE_MAXIMA && idade >
+                0;
     }
 }

@@ -27,8 +27,11 @@ private final ClienteRepository repository;
 
     @GetMapping
     public ResponseEntity<List<Cliente>> obterTodosClientes() {
+        if (repository.count() == 0) {
+            return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+        }else{
         List<Cliente> clientes = repository.findAll();
-        return new ResponseEntity<>(clientes, HttpStatus.OK);
+        return new ResponseEntity<>(clientes, HttpStatus.OK);}
     }
 
     @GetMapping("/{id}")
@@ -76,7 +79,7 @@ private final ClienteRepository repository;
             clienteExistente.setDataNascimento(cliente.getDataNascimento());
             clienteExistente.setEmail(cliente.getEmail());
             return repository.save(clienteExistente);
-        }).orElse(null);
+        }).orElseThrow(() -> new ClienteNotFoundException("Cliente não encontrado para o ID: " + id));
         return new ResponseEntity<>(clienteAtualizado, HttpStatus.OK);
     }
 
